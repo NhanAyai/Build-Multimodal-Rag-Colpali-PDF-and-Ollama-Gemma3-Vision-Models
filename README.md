@@ -123,7 +123,6 @@ def inference(question: str):
 # Example query
 inference_result = inference("Hãy giải thích bằng tiếng Việt figure 1.")
 print(inference_result)
-```
 
 ## Workflow
 
