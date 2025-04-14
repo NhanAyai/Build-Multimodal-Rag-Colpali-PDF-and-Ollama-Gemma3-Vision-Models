@@ -3,7 +3,10 @@
 ## Description
 
 This project demonstrates how to build a powerful Multimodal Retrieval-Augmented Generation (RAG) system capable of understanding both text and images within PDF documents. It leverages the Colpali library to index PDF files, extracting both text and image information. Subsequently, it uses an Ollama-hosted Gemma3 vision model (specifically the 4 billion parameter version or larger) to answer user queries based on the indexed content of these PDFs. This system allows you to ask questions that require understanding not just the text but also the visual information present in your PDF documents.
-![Image](https://github.com/user-attachments/assets/82750688-90af-407c-9881-b41fa75c1f1b)
+
+<div align="center">
+  ![Image](https://github.com/user-attachments/assets/82750688-90af-407c-9881-b41fa75c1f1b)
+</div>
 
 ## Key Features
 
@@ -120,3 +123,55 @@ def inference(question: str):
 # Example query
 inference_result = inference("Hãy giải thích bằng tiếng Việt figure 1.")
 print(inference_result)
+
+graph TD
+    subgraph Installation and Setup
+        A[Install byaldi] --> B(Install poppler-utils);
+        B --> C[Install transformers, qwen-vl-utils, flash-attn, optimum, auto-gptq, bitsandbytes];
+        C --> D[Install ollama];
+        D --> E[Install colab-xterm];
+        E --> F[Install triton];
+        F --> G[Update apt];
+        G --> H[Install poppler-utils (again)];
+    end
+
+    subgraph Load ColPali RAG Model
+        I[Import byaldi] --> J(Load RAGMultiModalModel);
+    end
+
+    subgraph Get Document
+        K[Download PDF from URL] --> L(Create 'docs' directory);
+        L --> M[Move PDF to 'docs/attention.pdf'];
+    end
+
+    subgraph Index PDF
+        N[RAG.index(input_path, index_name, store_collection_with_index, overwrite)];
+    end
+
+    subgraph Set Up Gemma3 Vision
+        O[Update apt];
+        O --> P[Install pciutils];
+        P --> Q[Install Ollama via script];
+        Q --> R{Start Ollama Serve in Background};
+        R --> S[Wait 5 seconds];
+        S --> T[ollama pull gemma3:4b];
+    end
+
+    subgraph Perform Inference
+        U[Define see_image(image_base64)] --> V[Define inference(question)];
+        V --> V1{RAG.search(question, k=1)};
+        V1 --> V2{see_image(results[0]['base64'])};
+        V2 --> V3{ollama.chat(model='gemma3:4b', messages=[...])};
+        V3 --> W[Return response['message']['content']];
+    end
+
+    subgraph Example Query
+        X[inference("Hãy giải thích bằng tiếng Việt figure 1.")] --> Y[Print inference_result];
+    end
+
+    Installation and Setup --> J;
+    J --> K;
+    M --> N;
+    N --> O;
+    T --> U;
+    W --> Y;
