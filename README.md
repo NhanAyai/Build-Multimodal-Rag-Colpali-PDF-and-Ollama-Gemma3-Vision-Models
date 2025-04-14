@@ -138,18 +138,22 @@ graph TD
         F --> G[Update apt];
         G --> H[Install poppler-utils (again)];
     end
+    end
 
     subgraph Load ColPali RAG Model
         I[Import byaldi] --> J(Load RAGMultiModalModel);
+    end
     end
 
     subgraph Get Document
         K[Download PDF from URL] --> L(Create 'docs' directory);
         L --> M[Move PDF to 'docs/attention.pdf'];
     end
+    end
 
     subgraph Index PDF
         N[RAG.index(input_path, index_name, store_collection_with_index, overwrite)];
+    end
     end
 
     subgraph Set Up Gemma3 Vision
@@ -160,6 +164,7 @@ graph TD
         R --> S[Wait 5 seconds];
         S --> T[ollama pull gemma3:4b];
     end
+    end
 
     subgraph Perform Inference
         U[Define see_image(image_base64)] --> V[Define inference(question)];
@@ -168,14 +173,16 @@ graph TD
         V2 --> V3{ollama.chat(model='gemma3:4b', messages=[...])};
         V3 --> W[Return response['message']['content']];
     end
+    end
 
     subgraph Example Query
         X[inference("Hãy giải thích bằng tiếng Việt figure 1.")] --> Y[Print inference_result];
     end
+    end
 
     Installation and Setup --> J;
-    J --> K;
-    M --> N;
-    N --> O;
-    T --> U;
-    W --> Y;
+    Load ColPali RAG Model --> K;
+    Get Document --> N;
+    Index PDF --> O;
+    Set Up Gemma3 Vision --> U;
+    Perform Inference --> X;
