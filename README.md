@@ -1,0 +1,1 @@
+# Build-Multimodal-Rag-Colpali-PDF-and-Ollama-Gemma3-Vision-Models
