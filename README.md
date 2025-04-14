@@ -112,8 +112,6 @@ print(inference_result)
 ```
 
 ## 🔄 Workflow
-
-<antArtifact identifier="multimodal-rag-workflow" title="Multimodal RAG System Workflow" type="application/vnd.ant.mermaid">
   
 flowchart TB
     subgraph Indexing["PDF Indexing Process"]
