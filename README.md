@@ -113,23 +113,13 @@ print(inference_result)
 
 ## 🔄 Workflow
   
-flowchart TB
-    subgraph Indexing["PDF Indexing Process"]
-        A[PDF Document] -->|Upload| B[ColPali RAG Model]
-        B -->|Extract Text & Images| C[Create Vector Index]
-        C -->|Store| D[(Vector Database)]
-        B -->|Encode Images to Base64| E[Image Storage]
-    end
-    
-    subgraph Querying["Query Process"]
-        F[User Query] -->|Search| D
-        D -->|Retrieve Relevant Text| G[Text Context]
-        E -->|Retrieve Relevant Images| H[Image Context]
-        G -->|Format Prompt| I[Final Prompt]
-        H -->|Attach Images| I
-        I -->|Send to| J[Ollama Gemma3 Vision Model]
-        J -->|Generate| K[Response to User]
-    end
-    
-    style Indexing fill:#f5f5f5,stroke:#333,stroke-width:1px
-    style Querying fill:#f0f0ff,stroke:#333,stroke-width:1px
+```mermaid
+graph LR
+    A[User Query] --> B(Retrieval)
+    B -- Text Snippets --> C{Gemma3 Vision Model}
+    B -- Image Data --> C
+    D[PDF Document] --> E(Colpali Image Extraction)
+    D --> F(Text Extraction)
+    E --> B
+    F --> B
+    C -- Answer --> G[User Response]
