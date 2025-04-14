@@ -1,133 +1,121 @@
-# Build-Multimodal-Rag-Colpali-PDF-and-Ollama-Gemma3-Vision-Models
+# 📁🧠👀 Build-Multimodal-Rag-Colpali-PDF-and-Ollama-Gemma3-Vision-Models
 
 ## Description
 
-This project demonstrates how to build a powerful Multimodal Retrieval-Augmented Generation (RAG) system capable of understanding both text and images within PDF documents. It leverages the Colpali library to extract images from PDF files and utilizes an Ollama-hosted Gemma3 vision model (specifically the 4 billion parameter version or larger) to provide insightful answers to your queries based on the combined content of the PDF. This system allows you to ask questions that require understanding not just the text but also the visual information present in your PDF documents.
+This project demonstrates how to build a powerful Multimodal Retrieval-Augmented Generation (RAG) system capable of understanding both text and images within PDF documents. It leverages the Colpali library to index PDF files, extracting both text and image information. Subsequently, it uses an Ollama-hosted Gemma3 vision model (specifically the 4 billion parameter version or larger) to answer user queries based on the indexed content of these PDFs. This system allows you to ask questions that require understanding not just the text but also the visual information present in your PDF documents.
 
 ## Key Features
 
 * **Multimodal Understanding:** Processes and understands both textual and visual information from PDF documents.
-* **PDF Image Extraction:** Uses the Colpali library to automatically extract images embedded within PDF files.
+* **PDF Indexing with Colpali:** Utilizes the `byaldi` library to load a pre-trained RAG model and index PDF documents, storing both text and base64 representations of images.
 * **Ollama Integration:** Seamlessly integrates with Ollama to run the Gemma3 vision model locally.
-* **Gemma3 Vision Inference:** Employs the state-of-the-art Gemma3 model (4b or larger) for reasoning about the combined text and image content.
-* **RAG Architecture:** Implements a Retrieval-Augmented Generation pipeline to provide contextually relevant answers.
+* **Gemma3 Vision Inference:** Employs the state-of-the-art Gemma3 model (4b or larger) for reasoning about the combined text and image content retrieved by the ColPali model.
+* **RAG Architecture:** Implements a Retrieval-Augmented Generation pipeline where Colpali handles the retrieval of relevant multimodal information, and Ollama Gemma3 performs the generation of the answer.
 
 ## Installation
 
 Follow these steps to set up the project environment:
 
-1.  **Install Ollama:**
-    Ollama is required to run the Gemma3 model locally. Follow the installation instructions for your operating system on the official Ollama website: [https://ollama.com/download](https://ollama.com/download)
-
-2.  **Pull the Gemma3 Model:**
-    Once Ollama is installed and running, pull the Gemma3 model that supports multimodal functionalities. **Important:** Ensure you pull a version that is 4 billion parameters or larger (e.g., `gemma3:4b` or a larger variant). Open your terminal and run:
+1.  **Install Dependencies:**
+    Run the following commands in a Google Colab notebook or a similar environment to install the necessary libraries and system utilities:
     ```bash
-    ollama pull gemma3:4b
+    !pip install -q byaldi
+    !sudo apt-get install -y poppler-utils
+    !pip install -q git+[https://github.com/huggingface/transformers.git](https://github.com/huggingface/transformers.git) qwen-vl-utils flash-attn optimum auto-gptq bitsandbytes
+    !pip install -q ollama
+    !pip install -q colab-xterm
+    !pip install -q triton
+    !sudo apt-get update
+    !sudo apt-get install poppler-utils
     ```
-    You can replace `gemma3:4b` with a larger version if available and desired.
 
-3.  **Install Python and Dependencies:**
-    Ensure you have Python 3.7 or later installed. You will need to install the Colpali library and potentially other Python packages. It's recommended to create a virtual environment to manage dependencies.
+2.  **Load ColPali RAG Model:**
+    The project uses a pre-trained ColPali RAG model for indexing. This is loaded using the following Python code:
+    ```python
+    import os
+    import base64
+    from byaldi import RAGMultiModalModel
 
+    RAG = RAGMultiModalModel.from_pretrained("vidore/colpali-v1.2", verbose=1)
+    ```
+
+3.  **Get a Sample Document:**
+    A sample PDF document ("Attention is all you need" paper) is downloaded for demonstration:
     ```bash
-    # Create a virtual environment (optional but recommended)
-    python -m venv venv
-    source venv/bin/activate  # On Linux/macOS
-    # venv\Scripts\activate  # On Windows
-
-    # Install Colpali and other necessary libraries (you might need to install other libraries depending on your RAG implementation)
-    pip install colpali
-    pip install ipython  # For displaying images in some environments
-    pip install ollama
-    # Add any other libraries your specific implementation requires (e.g., for document loading, indexing, etc.)
+    !wget [https://arxiv.org/pdf/1706.03762](https://arxiv.org/pdf/1706.03762)
+    !mkdir docs
+    !mv 1706.03762 docs/attention.pdf
     ```
+    You can replace this with your own PDF documents.
+
+4.  **Index the PDF:**
+    The ColPali RAG model is used to index the PDF document. This process extracts text and stores base64 representations of images:
+    ```python
+    RAG.index(
+        input_path="./docs/attention.pdf",
+        index_name="attention",
+        store_collection_with_index=True,  # Store base64 representation of images
+        overwrite=True
+    )
+    ```
+
+5.  **Set Up Ollama and Gemma3 Vision:**
+    Ollama is installed and the Gemma3 vision model (4b) is pulled:
+    ```bash
+    !sudo apt update
+    !sudo apt install -y pciutils
+    !curl -fsSL [https://ollama.com/install.sh](https://ollama.com/install.sh) | sh
+    import threading
+    import subprocess
+    import time
+
+    def run_ollama_serve():
+        subprocess.Popen(["ollama", "serve"])
+
+    thread = threading.Thread(target=run_ollama_serve)
+    thread.start()
+    time.sleep(5)
+    !ollama pull gemma3:4b
+    ```
+    This sets up the local Ollama server and downloads the necessary Gemma3 model.
 
 ## Usage
 
-Here's how to use the project to ingest a PDF and query it:
+The core functionality for performing inference is encapsulated in the `inference` function:
 
-1.  **Prepare Your PDF Document:**
-    Place the PDF document you want to analyze in a designated directory within your project (e.g., a folder named `documents`).
+```python
+from IPython.display import Image
+import ollama
+import base64
 
-2.  **Implement the RAG Pipeline:**
-    You will need to write Python code to implement the RAG pipeline. This typically involves the following steps:
-    * **Loading the PDF:** Load your PDF document.
-    * **Image Extraction (using Colpali):** Use Colpali to extract images from the PDF. You might need to iterate through the pages of the PDF and extract images as needed.
-    * **Text Extraction:** Extract the text content from the PDF.
-    * **Indexing (Optional but Recommended):** You might want to index the text and potentially the image features to enable efficient retrieval. This could involve using libraries like Langchain, LlamaIndex, or creating your own indexing mechanism.
-    * **Retrieval:** When a user asks a question, retrieve relevant text snippets and potentially associated images based on the query.
-    * **Generation (using Ollama Gemma3):** Send the user's question along with the retrieved context (text and image data) to the Ollama Gemma3 model for generating an answer.
+def see_image(image_base64):
+    """Decodes and displays a base64 encoded image."""
+    image_bytes = base64.b64decode(image_base64)
+    filename = 'image.jpg'
+    with open(filename, 'wb') as f:
+        f.write(image_bytes)
+    display(Image(filename))
 
-3.  **Example Code Snippet (Illustrative - Adapt to your specific implementation):**
+def inference(question: str):
+    """
+    Performs inference using the Gemma3 vision model.
 
-    ```python
-    from IPython.display import Image, display
-    import base64
-    import ollama
-    import colpali
+    It retrieves relevant data using the loaded ColPali RAG model,
+    displays the retrieved image, and then queries the Ollama Gemma3 model
+    with the question and the local image.
+    """
+    results = RAG.search(question, k=1)  # Retrieve relevant data using ColPali
+    see_image(results[0]['base64'])  # Display the retrieved image
+    response = ollama.chat(
+        model='gemma3:4b',
+        messages=[{
+            'role': 'user',
+            'content': question,
+            'images': ['image.jpg']
+        }]
+    )
+    return response['message']['content']
 
-    def load_and_extract_images(pdf_path):
-        """Loads a PDF and extracts images using Colpali."""
-        images = colpali.extract_images(pdf_path)
-        return images
-
-    def display_image_from_base64(image_base64):
-        """Displays an image from a base64 string."""
-        image_bytes = base64.b64decode(image_base64)
-        filename = 'temp_image.jpg'
-        with open(filename, 'wb') as f:
-            f.write(image_bytes)
-        display(Image(filename))
-
-    def query_gemma3_vision(question: str, image_base64: str = None):
-        """Sends a question and an optional image to the Gemma3 vision model."""
-        messages = [{'role': 'user', 'content': question}]
-        if image_base64:
-            messages[0]['images'] = [image_base64]
-
-        response = ollama.chat(
-            model='gemma3:4b',
-            messages=messages
-        )
-        return response['message']['content']
-
-    # Example Usage
-    pdf_file = "path/to/your/document.pdf"  # Replace with the actual path
-    extracted_images = load_and_extract_images(pdf_file)
-
-    # You would typically implement a more sophisticated RAG pipeline here
-    # For this simple example, let's assume you want to ask a question about the first image found
-    if extracted_images:
-        first_image = extracted_images[0]
-        user_question = "Describe this image."
-        answer = query_gemma3_vision(user_question, first_image['base64'])
-        print(f"Question: {user_question}")
-        print(f"Answer from Gemma3: {answer}")
-        display_image_from_base64(first_image['base64'])
-
-    # You can also ask questions that might relate to both text and images,
-    # depending on how you've structured your RAG pipeline.
-    # For instance, if you've indexed text and associated images:
-    # user_question_complex = "Explain figure 1 and its significance based on the text."
-    # # Your RAG pipeline would retrieve the relevant text and image (if figure 1 was identified)
-    # # and then you would send both to Gemma3.
-    ```
-
-4.  **Run Your Code:**
-    Execute your Python script that implements the RAG pipeline.
-
-5.  **Ask Questions:**
-    Interact with your system by providing questions related to the content of your PDF document. The Gemma3 model, with the help of the retrieved context (including images), should provide relevant answers.
-
-## Architecture (Optional but Recommended)
-
-```mermaid
-graph LR
-    A[User Query] --> B(Retrieval);
-    B -- Text Snippets --> C{Gemma3 Vision Model};
-    B -- Image Data --> C;
-    D[PDF Document] --> E(Colpali Image Extraction);
-    D --> F(Text Extraction);
-    E --> B;
-    F --> B;
-    C -- Answer --> G[User Response];
+# Example query
+inference_result = inference("Hãy giải thích bằng tiếng Việt figure 1.")
+print(inference_result)
