@@ -123,7 +123,11 @@ def inference(question: str):
 # Example query
 inference_result = inference("Hãy giải thích bằng tiếng Việt figure 1.")
 print(inference_result)
+```
 
+## Workflow
+
+```mermaid
 graph TD
     subgraph Installation and Setup
         A[Install byaldi] --> B(Install poppler-utils);
