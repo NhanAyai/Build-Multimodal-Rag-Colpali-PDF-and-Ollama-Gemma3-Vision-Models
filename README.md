@@ -3,6 +3,7 @@
 ## Description
 
 This project demonstrates how to build a powerful Multimodal Retrieval-Augmented Generation (RAG) system capable of understanding both text and images within PDF documents. It leverages the Colpali library to index PDF files, extracting both text and image information. Subsequently, it uses an Ollama-hosted Gemma3 vision model (specifically the 4 billion parameter version or larger) to answer user queries based on the indexed content of these PDFs. This system allows you to ask questions that require understanding not just the text but also the visual information present in your PDF documents.
+![Image](https://github.com/user-attachments/assets/82750688-90af-407c-9881-b41fa75c1f1b)
 
 ## Key Features
 
