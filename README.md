@@ -21,14 +21,14 @@ Follow these steps to set up the project environment:
 1.  **Install Dependencies:**
     Run the following commands in a Google Colab notebook or a similar environment to install the necessary libraries and system utilities:
     ```bash
-    !pip install -q byaldi
-    !sudo apt-get install -y poppler-utils
-    !pip install -q git+https://github.com/huggingface/transformers.git qwen-vl-utils flash-attn optimum auto-gptq bitsandbytes
-    !pip install -q ollama
-    !pip install -q colab-xterm
-    !pip install -q triton
-    !sudo apt-get update
-    !sudo apt-get install poppler-utils
+    pip install -q byaldi
+    sudo apt-get install -y poppler-utils
+    pip install -q git+https://github.com/huggingface/transformers.git qwen-vl-utils flash-attn optimum auto-gptq bitsandbytes
+    pip install -q ollama
+    pip install -q colab-xterm
+    pip install -q triton
+    sudo apt-get update
+    sudo apt-get install poppler-utils
     ```
 2.  **Load ColPali RAG Model:**
     The project uses a pre-trained ColPali RAG model for indexing. This is loaded using the following Python code:
@@ -41,9 +41,9 @@ Follow these steps to set up the project environment:
 3.  **Get a Sample Document:**
     A sample PDF document ("Attention is all you need" paper) is downloaded for demonstration:
     ```bash
-    !wget https://arxiv.org/pdf/1706.03762
-    !mkdir docs
-    !mv 1706.03762 docs/attention.pdf
+    wget https://arxiv.org/pdf/1706.03762
+    mkdir docs
+    mv 1706.03762 docs/attention.pdf
     ```
     You can replace this with your own PDF documents.
 4.  **Index the PDF:**
@@ -59,9 +59,9 @@ Follow these steps to set up the project environment:
 5.  **Set Up Ollama and Gemma3 Vision:**
     Ollama is installed and the Gemma3 vision model (4b) is pulled:
     ```bash
-    !sudo apt update
-    !sudo apt install -y pciutils
-    !curl -fsSL https://ollama.com/install.sh | sh
+    sudo apt update
+    sudo apt install -y pciutils
+    curl -fsSL https://ollama.com/install.sh | sh
     import threading
     import subprocess
     import time
@@ -70,7 +70,7 @@ Follow these steps to set up the project environment:
     thread = threading.Thread(target=run_ollama_serve)
     thread.start()
     time.sleep(5)
-    !ollama pull gemma3:4b
+    ollama pull gemma3:4b
     ```
     This sets up the local Ollama server and downloads the necessary Gemma3 model.
 
